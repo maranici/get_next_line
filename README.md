@@ -85,5 +85,46 @@ Calling `get_next_line` repeatedly will produce:
 2. `"42 is amazing.\n"`
 3. `NULL` (end of file).
 
+## Bonus Part: Handling Multiple File Descriptors
+The bonus part extends `get_next_line` to support reading from multiple file descriptors simultaneously, while still adhering to the requirement of using only one static variable.
+
+### Implementation Details
+- **Static Array:**
+  A static array is used to maintain separate buffers for each FD:
+
+  ```c
+  static char *buffer[4096];
+  ```
+
+- **Indexed by FD:**
+  Each index in the `buffer` array corresponds to a specific FD. This allows each FD to retain its own buffer state independently.
+
+### Key Features
+1. **Multiple FD Support:**
+   - The function can handle simultaneous reads from different FDs without interference.
+
+2. **Efficient Memory Management:**
+   - Each FD's buffer is dynamically allocated and freed as necessary.
+
+### Improvement Suggestion
+The current implementation uses a fixed-size static array (`buffer[4096]`), which reserves memory for a large number of FDs even if most are unused. An improvement would be to use a dynamic data structure, such as a hash table or linked list, to allocate buffers only for active FDs. This would optimize memory usage and make the implementation more scalable.
+
+### Example Usage
+```c
+int fd1 = open("file1.txt", O_RDONLY);
+int fd2 = open("file2.txt", O_RDONLY);
+
+char *line1 = get_next_line(fd1);
+char *line2 = get_next_line(fd2);
+
+printf("From file1: %s", line1);
+printf("From file2: %s", line2);
+
+free(line1);
+free(line2);
+close(fd1);
+close(fd2);
+```
+
 ## Conclusion
 The `get_next_line` project is an excellent exercise in memory management, file handling, and efficient reading strategies. By mastering this project, you develop foundational skills essential for more advanced programming tasks.
